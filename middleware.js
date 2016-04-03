@@ -9,20 +9,37 @@ var ResellerSchema = new mongoose.Schema({
     address: String
 });
 
-// 后置
-ResellerSchema.post('save', function(next){
-    console.log('this is ResellerSchema post save middleware');
-    next(); // 串行
+ResellerSchema.pre('save', function(next, done){
+    console.log('pre serial save middleware');
+    next();
 });
 
-// 可以并行执行的中间件
+// `true` means it is a parallel middleware. We **must** specify `true`
+// as the second parameter if we want to use parallel middleware.
 ResellerSchema.pre('save', true, function(next, done){
-    console.log('this is ResellerSchema pre save middleware');
-    next();
-    // done 需要传给并行执行的方法或者过程，当该并行执行的方法或过程完成执行之后，调用 done
-    // 以通知 mongoose 执行完成。
+    console.log('pre parallel save middleware');
+    // The hooked method 'save', will not be executed until done is called by each middleware (in our case, only one).
+    // Then mongoose knows to go next()!
     done();
+    next();
 });
+
+ResellerSchema.post('save', function(doc, next){
+    console.log('post save middleware A ' + doc);
+    next();
+});
+
+// Will not execute until the first middleware calls `next()`
+ResellerSchema.post('save', function(doc, next){
+    console.log('post save middleware B ' + doc);
+    next();
+});
+
+// But this one is not asynchronous, it will be triggered firstly before the above two post!
+ResellerSchema.post('save', function(doc){
+    console.log('post save middleware no Asynchronous ' + doc);
+});
+
 
 var Reseller = mongoose.model('Reseller', ResellerSchema);
 

@@ -1,4 +1,5 @@
 // Run 'node methods.js' to test
+// http://mongoosejs.com/docs/2.7.x/docs/methods-statics.html
 var mongoose = require('mongoose');
 
 mongoose.connect('mongodb://localhost/mongodemo');
